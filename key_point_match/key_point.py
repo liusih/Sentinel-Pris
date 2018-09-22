@@ -5,18 +5,22 @@ import json
 import copy
 import time
 from utils import *
+import datetime
+
+#long running
 
 
 class KeyPoint(object):
     def __init__(self, compare_corpus_path='data/compare_corpus_11.json'):
         self.compare_corpus = corpus(compare_corpus_path) # 加载匹配库
-        self.compare_corpus_vector = copy.deepcopy(self.compare_corpus)
-        self.model_path= "model/word2vec_include.model"
-        self.model_loaded= Word2Vec.load(self.model_path)
+        #self.compare_corpus_vector = copy.deepcopy(self.compare_corpus)
+        # self.model_path= "model/word2vec_include.model"
+        # self.model_loaded= Word2Vec.load(self.model_path)
         # for topic in self.compare_corpus_vector:
         #         for keypoint in self.compare_corpus_vector[topic]:
         #             self.compare_corpus_vector[topic][keypoint]["compared_corpus"] = getsimlist_vec(self.compare_corpus[topic][keypoint]["compared_corpus"])
         print('******初始化完成******')
+        
 
     def get_similarity(self, topic, method, sentence):
         '''
@@ -46,7 +50,7 @@ class KeyPoint(object):
             elif method == 'word2vec':
                 threshold = sim_corpus[key]['threshold']['word2vec']
                 # score_result = w2v_model_new(sentence, self.compare_corpus_vector[topic][key]["compared_corpus"], threshold)
-                score_result = w2v_model(sentence, self.compare_corpus[topic][key]["compared_corpus"], threshold, self.model_loaded)
+                score_result = w2v_model(sentence, self.compare_corpus[topic][key]["compared_corpus"], threshold)
             elif method == 'regex':
                 re_patterns = sim_corpus[key]['patterns']
                 score_result = regex(sentence, re_patterns)
@@ -468,8 +472,12 @@ if __name__ == '__main__':
             "end_time": "176.72"
         }
     ]
+   
     topic = '现金分期'
+    start = time.time()
     result = key_point.run_word2vec(transcripts=transcripts, topic=topic)
+    end = time.time()
+    print ('time:',end-start)
     print("测试单个对话:", result)
     exit()
 

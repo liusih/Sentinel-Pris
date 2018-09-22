@@ -6,9 +6,10 @@ import numpy as np
 import jieba
 from scipy.spatial.distance import pdist
 
-
-# model_path= "model/word2vec_include.model"
-# model_loaded= Word2Vec.load(model_path)
+stop_path='data/ChineseStopWords.txt'
+stopwordlist=[line.strip() for line in open(stop_path,encoding='utf-8')]
+model_path= "model/word2vec_include.model"
+model_loaded= Word2Vec.load(model_path)
 # wordvec_size = len(model_loaded['账单'])
 # zero_pad = [0 for n in range(wordvec_size)]
 
@@ -133,7 +134,7 @@ def w2v_model_new(sentence, simi_list, threshold):
     else:
         return sim_temp_dict
 
-def w2v_model(sentence,simi_list,threshold,model_loaded):
+def w2v_model(sentence,simi_list,threshold):
     '''
 
     单句与匹配句子list做相似度计算，返回相似度分值最高的一个
@@ -145,50 +146,44 @@ def w2v_model(sentence,simi_list,threshold,model_loaded):
                            'compared_source':'', # 匹配库中的句子
                            'matched_regex':'' # 置为空}
     '''
-    stopwordlist = stopwordslist('data/ChineseStopWords.txt')
     words = list(jieba.cut(sentence.strip()))
-    words_new=[]
-    for each_slice in words:
-        try:
-             vocab = model_loaded[each_slice]
-             words_new.append(each_slice)
-        except KeyError:
-            pass
+    words_list=deal_stop(words)
+    words_new=deal_catch(words_list)
+    # for each_slice in words_list:
+    #     try:
+    #          vocab = model_loaded[each_slice]
+    #          words_new.append(each_slice)
+    #     except KeyError:
+    #         pass
             # print("not in vocabulary")
-    words_list=[]
-    for wor in words_new:
-    	if wor not in stopwordlist:
-    		words_list.append(wor)
-    	else:
-    		pass
+    
+    # for wor in words_new:
+    # 	if wor not in stopwordlist:
+    # 		words_list.append(wor)
+    # 	else:
+    # 		pass
 
     sim_temp_dict = {}
     sim_temp = float(threshold)
     for candidate in simi_list:
-        candidate_new=[]
         score = 0
         if candidate == '':
             pass
+        if words_new==[]:
+                pass
         else:
             candidate_sentence = candidate
             candidate = list(jieba.cut(candidate))
-            candidate_list=[]
-            for wor in candidate:
-            	if wor not in stopwordlist:
-            		candidate_list.append(wor)
-            	else:
-            		pass
-            candidate_new=[]
-            for each_slice in candidate_list:
-                try:
-                    vocab = model_loaded[each_slice]
-                    candidate_new.append(each_slice)
-                   # print(candidate_new)
-                except KeyError:
-                    pass
+            candidate_list=deal_stop(candidate)
+            candidate_new=deal_catch(candidate_list)
+            # for each_slice in candidate_list:
+            #     try:
+            #         vocab = model_loaded[each_slice]
+            #         candidate_new.append(each_slice)
+            #        # print(candidate_new)
+            #     except KeyError:
+            #         pass
             if candidate_new==[]:
-            	pass
-            elif words_list==[]:
             	pass
             else:
                # print('input',candidate_new)
@@ -207,6 +202,28 @@ def w2v_model(sentence,simi_list,threshold,model_loaded):
     else:
         return sim_temp_dict
 
+def deal_stop(list_in):
+    '''
+    :@para list_in :list 需要去停词的列表
+    ：@para list_out: list 去停词后的列表
+    '''
+    list_out = [word for word in list_in if word not in stopwordlist]
+    
+    return list_out
+
+def deal_catch(list_input):
+    '''
+    :@para list_input :list 需要检测列表中word是否在vocabulary的列表
+    ：@para list_output: list 检测后输出的列表
+    '''
+    list_output=[]
+    for each_slice in list_input:
+        try:
+             vocab = model_loaded[each_slice]
+             list_output.append(each_slice)
+        except KeyError:
+            pass
+    return list_output
 
 def getsimlist_vec(list):
     """
@@ -244,16 +261,6 @@ def getscore(sentence_vec, sim_vec):
     else:
         score = pdist(np.vstack([sentence_vec, sim_vec]), 'cosine')
     return 1 - score
-
-
-def stopwordslist(filepath):
-    #stoplist = {}.fromkeys([line.strip() for line in open(filepath,encoding='utf-8')])
-    stoplist =[]
-    with open(filepath,'r',encoding='utf-8') as f:
-        for line in f:
-            stoplist.append(line)
-
-    return stoplist
 
 def get_vec(sentence):
     s = jieba.cut(sentence)
