@@ -7,10 +7,10 @@ import jieba
 from scipy.spatial.distance import pdist
 
 
-model_path= "model/word2vec_include.model"
-model_loaded= Word2Vec.load(model_path)
-wordvec_size = len(model_loaded['账单'])
-zero_pad = [0 for n in range(wordvec_size)]
+# model_path= "model/word2vec_include.model"
+# model_loaded= Word2Vec.load(model_path)
+# wordvec_size = len(model_loaded['账单'])
+# zero_pad = [0 for n in range(wordvec_size)]
 
 
 def corpus(path):
@@ -133,7 +133,7 @@ def w2v_model_new(sentence, simi_list, threshold):
     else:
         return sim_temp_dict
 
-def w2v_model(sentence,simi_list,threshold):
+def w2v_model(sentence,simi_list,threshold,model_loaded):
     '''
 
     单句与匹配句子list做相似度计算，返回相似度分值最高的一个
@@ -183,7 +183,7 @@ def w2v_model(sentence,simi_list,threshold):
                 try:
                     vocab = model_loaded[each_slice]
                     candidate_new.append(each_slice)
-                    print(candidate_new)
+                   # print(candidate_new)
                 except KeyError:
                     pass
             if candidate_new==[]:
@@ -191,7 +191,7 @@ def w2v_model(sentence,simi_list,threshold):
             elif words_list==[]:
             	pass
             else:
-                print('input',candidate_new)
+               # print('input',candidate_new)
                 score = model_loaded.n_similarity(words_new,candidate_new)
                 if score > sim_temp:
 	                sim_temp = score
